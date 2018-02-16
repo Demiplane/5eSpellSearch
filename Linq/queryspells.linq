@@ -5,15 +5,20 @@
 
 void Main()
 {
-	var jsonSpellDatabasePath = @"";
+	var jsonSpellDatabasePath = Util.ReadLine();
 	
 	var spells = JsonConvert.DeserializeObject<IEnumerable<Spell>>(File.ReadAllText(jsonSpellDatabasePath));
 		
 		spells
 	
-		// query here
+		.Where(f => f.Level() <= 5)
+		.Where(f => !f.Tags.Contains("bard"))
+		.Where(f => !f.ConsumesComponents())
+		
 	
 		.Dump();
+		
+		spells.Where(f => f.Tags.Contains("bard")).Dump();
 }
 
 public static class SpellExtensions

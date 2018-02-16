@@ -10,7 +10,7 @@
 
 void Main()
 {
-	var jsonSpellDatabasePath = @"";
+	var jsonSpellDatabasePath = Util.ReadLine();
 	
 	var spellUris = AcquireSpellUrisFromGrimoire();
 
@@ -47,6 +47,7 @@ public Spell DownloadSpellAsJson(Uri uri)
 	var skip = document.Descendants("article").First().SelectNodes("p").Any(f => f.InnerText.StartsWith("Components:")) ? 5 : 0;
 
 	var articlePNodes = document.Descendants("article").First().SelectNodes("p");
+	var articlePOrLiNodes = document.Descendants("article").First().ChildNodes.Where(c => c.Name == "p" || c.Name == "ul").SelectMany(c => c.Name == "p" ? new[] {c} : c.Descendants("li"));
 
 	if (skip > 0)
 	{
@@ -57,9 +58,9 @@ public Spell DownloadSpellAsJson(Uri uri)
 		duration = articlePNodes.Skip(4).First().LastChild.InnerText;
 	}
 
-	var description = string.Join(Environment.NewLine, articlePNodes.Skip(skip).Reverse().Skip(1).Reverse().Select(p => p.InnerHtml));
+	var description = string.Join(Environment.NewLine, articlePOrLiNodes.Skip(skip).Reverse().Skip(1).Reverse().Select(p => p.InnerText).Select(f => f.Trim().TrimStart('.').Trim()));
 
-	var higherLevelsSplitToken = "<strong>At Higher Levels.</strong>";
+	var higherLevelsSplitToken = "At Higher Levels.";
 
 	var atHigherLevels = description.Contains(higherLevelsSplitToken) ? description.Split(new[] { higherLevelsSplitToken }, StringSplitOptions.RemoveEmptyEntries).Last().Trim() : string.Empty;
 	description = description.Split(new[] { higherLevelsSplitToken }, StringSplitOptions.RemoveEmptyEntries).First().Trim();
